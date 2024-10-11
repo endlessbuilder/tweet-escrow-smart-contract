@@ -7,8 +7,6 @@ pub struct EscrowConfig {
     pub admin: Pubkey,
     pub backend_wallet: Pubkey,
 
-    pub escrow_authority: Pubkey,
-
     pub buyer_deposit_time_window: u64,
     pub seller_service_time_window: u64,
     pub seller_withdraw_time_window: u64,

@@ -15,7 +15,10 @@ declare_id!("Bh3Y47AqrAWBGCtFmSKqBdyA7tNtHGdD2yrYF9apSWJH");
 pub mod tweet_escrow {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        initialize::handler(ctx)
+    pub fn initialize<'info>(
+        ctx: Context<'_, '_, '_, 'info, InitializeCtx>,
+        params: InitializeConifgParams,
+    ) -> Result<()> {
+        initialize::handler(ctx, &params)
     }
 }
