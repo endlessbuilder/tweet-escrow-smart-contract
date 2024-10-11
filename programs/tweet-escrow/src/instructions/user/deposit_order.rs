@@ -58,13 +58,13 @@ pub struct DepositOrderCtx<'info> {
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct CreateOrderParams {
+pub struct DepositOrderParams {
     pub deposit_amount: u64,
 }
 
 pub fn handler<'info>(
     ctx: Context<'_, '_, '_, 'info, DepositOrderCtx>,
-    params: &CreateOrderParams,
+    params: &DepositOrderParams,
 ) -> Result<()> {
     msg!(">>> deposit to order");
 

@@ -55,7 +55,31 @@ pub mod tweet_escrow {
     ) -> Result<()> {
         set_time_windows::handler(ctx, &params)
     }
-    
 
+    pub fn create_order<'info>(
+        ctx: Context<'_, '_, '_, 'info, CreateOrderCtx>,
+        params: CreateOrderParams,
+    ) -> Result<()> {
+        create_order::handler(ctx, &params)
+    }
+
+    pub fn seller_served<'info>(
+        ctx: Context<'_, '_, '_, 'info, SellerServedCtx>,
+    ) -> Result<()> {
+        seller_served::handler(ctx)
+    }
+
+    pub fn deposit_order<'info>(
+        ctx: Context<'_, '_, '_, 'info, DepositOrderCtx>,
+        params: DepositOrderParams,
+    ) -> Result<()> {
+        deposit_order::handler(ctx, &params)
+    }
+
+    pub fn withdraw_order<'info>(
+        ctx: Context<'_, '_, '_, 'info, WithdrawOrderCtx>,
+    ) -> Result<()> {
+        withdraw_order::handler(ctx)
+    }
 
 }
