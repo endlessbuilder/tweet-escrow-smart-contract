@@ -12,7 +12,7 @@ pub enum TweetEscrowError {
     InvalidWithdrawAuthority,
     #[msg("Fee wallet is invalid")]
     InvaildFeeWallet,
-    #[msg("Deposit time window is expired")]
+    #[msg("Deposit time window has expired")]
     DepositTimeWindowExpired,
     #[msg("Order is not withdrawal")]
     OrderNotWithdrawal,
@@ -20,4 +20,10 @@ pub enum TweetEscrowError {
     WithdrawTimewindowNotPassedYet,
     #[msg("Withdraw is already done by seller")]
     WithdrawedAlready,
+    #[msg("Service time window has expired")]
+    ServiceTimeWindowExpired,
+    #[msg("Order has not been deposited by buyer yet")]
+    NotDepositedYet,
+    #[msg("Order has been already served by seller yet")]
+    ServedBySellerAlready,
 }
