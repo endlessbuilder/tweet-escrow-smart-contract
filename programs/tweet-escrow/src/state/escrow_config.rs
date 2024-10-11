@@ -1,15 +1,17 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::Transfer;
 
+use crate::constants::ESCROW_AUTHORITY_SEED;
+
 #[account]
 #[derive(Default, Debug)]
 pub struct EscrowConfig {
     pub admin: Pubkey,
     pub backend_wallet: Pubkey,
 
-    pub buyer_deposit_time_window: u64,
-    pub seller_service_time_window: u64,
-    pub seller_withdraw_time_window: u64,
+    pub buyer_deposit_time_window: i64,
+    pub seller_service_time_window: i64,
+    pub seller_withdraw_time_window: i64,
 
     pub fee_percentagte: u8,
     pub fee_wallet: Pubkey,
@@ -32,7 +34,7 @@ impl EscrowConfig {
         amount: u64,
     ) -> Result<()> {
         let authority_seeds: &[&[&[u8]]] =
-            &[&[b"escrow_authority", &[self.escrow_authority_bump]]];
+            &[&[ESCROW_AUTHORITY_SEED.as_bytes(), &[self.escrow_authority_bump]]];
 
         let context = CpiContext::new(
             token_program,

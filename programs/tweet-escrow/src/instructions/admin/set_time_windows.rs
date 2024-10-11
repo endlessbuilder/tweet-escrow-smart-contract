@@ -30,9 +30,9 @@ pub struct SetTimeWindowsCtx<'info> {
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct SetTimeWindowsParams {
-    pub new_buyer_deposit_time_window: u64,
-    pub new_seller_service_time_window: u64,
-    pub new_seller_withdraw_time_window: u64,
+    pub new_buyer_deposit_time_window: i64,
+    pub new_seller_service_time_window: i64,
+    pub new_seller_withdraw_time_window: i64,
 }
 
 pub fn handler<'info>(
