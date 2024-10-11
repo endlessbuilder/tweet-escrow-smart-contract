@@ -13,7 +13,7 @@ pub struct SetFeePercentCtx<'info> {
         mut,
         seeds = [ESCROW_CONFIG_SEED.as_bytes()],
         bump = escrow_config.bump,
-        constraint = escrow_config.admin == admin.key() @TweetEscrowError::InvalidAuthority
+        constraint = escrow_config.admin == admin.key() @ TweetEscrowError::InvalidAuthority
 
     )]
     pub escrow_config: Box<Account<'info, EscrowConfig>>,
