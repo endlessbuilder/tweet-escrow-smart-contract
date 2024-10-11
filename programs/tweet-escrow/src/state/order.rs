@@ -11,11 +11,13 @@ pub struct Order {
     pub seller_approved_at: i64, // timestamp when seller accepts buyer's order
     pub buyer_deposited_at: i64, // timestamp when buyer deposit full amount
 
+    pub deposited_amount: u64, // amount
     pub is_buyer_deposited: bool, 
     pub is_seller_served: bool,
     pub is_withdrawal: bool,
 
-    pub bump: u8
+    pub bump: u8,
+    pub order_escrow_bump: u8,
 }
 
 impl Order {

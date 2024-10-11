@@ -42,6 +42,7 @@ pub struct CreateOrderCtx<'info> {
     )]
     pub order: Box<Account<'info, Order>>,
 
+    /// CHECK: 
     #[account(
         seeds = [ORDER_ESCROW_SEED.as_bytes(), order.key().as_ref()],
         bump
@@ -68,9 +69,11 @@ pub fn handler<'info>(
     
     let order = ctx.accounts.order.as_mut();
     order.bump = ctx.bumps.order;
+    order.order_escrow_bump = ctx.bumps.order_escrow;
     order.seller = ctx.accounts.seller.key();
     order.buyer = ctx.accounts.buyer.key();
     order.price = params.order_price;
+    order.deposited_amount = 0;
     order.seller_approved_at = current_timestamp;
     order.is_buyer_deposited = false;
     order.is_seller_served = false;
