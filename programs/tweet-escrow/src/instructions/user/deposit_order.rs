@@ -32,7 +32,7 @@ pub struct DepositOrderCtx<'info> {
     )]
     pub order: Box<Account<'info, Order>>,
 
-    /// CHECK: 
+    /// CHECK:
     #[account(
         seeds = [ORDER_ESCROW_SEED.as_bytes(), order.key().as_ref()],
         bump = order.order_escrow_bump
@@ -58,13 +58,13 @@ pub struct DepositOrderCtx<'info> {
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct CreateOrderParams {
+pub struct DepositOrderParams {
     pub deposit_amount: u64,
 }
 
 pub fn handler<'info>(
     ctx: Context<'_, '_, '_, 'info, DepositOrderCtx>,
-    params: &CreateOrderParams,
+    params: &DepositOrderParams,
 ) -> Result<()> {
     msg!(">>> deposit to order");
 
@@ -80,6 +80,10 @@ pub fn handler<'info>(
         !is_deposit_completed,
         TweetEscrowError::OrderDepositedAlready
     );
+    require!(
+        (current_timestamp - order.seller_approved_at) < escrow_config.buyer_deposit_time_window,
+        TweetEscrowError::DepositTimeWindowExpired
+    );
 
     let amount_to_be_deposited = order.deposited_amount;
 
@@ -92,7 +96,7 @@ pub fn handler<'info>(
                 .to_account_info(),
             ctx.accounts.buyer.clone().to_account_info(),
             ctx.accounts.token_program.clone().to_account_info(),
-            amount_to_be_deposited
+            amount_to_be_deposited,
         )?;
         order.deposited_amount += amount_to_be_deposited;
         order.is_buyer_deposited = true;

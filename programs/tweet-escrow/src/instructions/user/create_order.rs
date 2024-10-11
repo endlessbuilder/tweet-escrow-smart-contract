@@ -78,6 +78,7 @@ pub fn handler<'info>(
     order.is_buyer_deposited = false;
     order.is_seller_served = false;
     order.is_withdrawal = false;
+    order.is_completed = false;
     
     Ok(())
 }
