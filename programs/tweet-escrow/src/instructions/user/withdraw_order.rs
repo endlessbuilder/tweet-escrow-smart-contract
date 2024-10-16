@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Token, TokenAccount};
+use anchor_spl::token::Token;
 
 use crate::constants::{ESCROW_AUTHORITY_SEED, ESCROW_CONFIG_SEED, ORDER_ESCROW_SEED, ORDER_SEED};
 use crate::error::TweetEscrowError;
@@ -53,21 +53,21 @@ pub struct WithdrawOrderCtx<'info> {
         mut,
         owner = fee_wallet.key() @ TweetEscrowError::InvalidTokenAccount
     )]
-    pub fee_pay_account: Account<'info, TokenAccount>,
+    pub fee_pay_account: AccountInfo<'info>,
 
     /// CHECK
     #[account(
         mut,
         owner = seller.key() @ TweetEscrowError::InvalidTokenAccount
     )]
-    pub seller_pay_account: Account<'info, TokenAccount>,
+    pub seller_pay_account: AccountInfo<'info>,
 
     /// CHECK
     #[account(
         mut,
         owner = order_escrow.key() @ TweetEscrowError::InvalidTokenAccount
     )]
-    pub order_escrow_pay_account: Account<'info, TokenAccount>,
+    pub order_escrow_pay_account: AccountInfo<'info>,
 
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
