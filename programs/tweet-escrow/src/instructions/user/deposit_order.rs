@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Token, TokenAccount};
+use anchor_spl::token::Token;
 
 use crate::constants::{ESCROW_AUTHORITY_SEED, ESCROW_CONFIG_SEED, ORDER_ESCROW_SEED, ORDER_SEED};
 use crate::error::TweetEscrowError;
@@ -44,14 +44,14 @@ pub struct DepositOrderCtx<'info> {
         mut,
         owner = buyer.key() @ TweetEscrowError::InvalidTokenAccount
     )]
-    pub buyer_pay_account: Account<'info, TokenAccount>,
+    pub buyer_pay_account: AccountInfo<'info>,
 
     /// CHECK
     #[account(
         mut,
         owner = order_escrow.key() @ TweetEscrowError::InvalidTokenAccount
     )]
-    pub order_escrow_pay_account: Account<'info, TokenAccount>,
+    pub order_escrow_pay_account: AccountInfo<'info>,
 
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,

@@ -1,7 +1,7 @@
-pub mod constants;
-pub mod error;
-pub mod instructions;
-pub mod state;
+mod constants;
+mod error;
+mod instructions;
+mod state;
 
 use anchor_lang::prelude::*;
 
