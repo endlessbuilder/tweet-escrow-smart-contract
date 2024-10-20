@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 
 use crate::constants::{ESCROW_AUTHORITY_SEED, ESCROW_CONFIG_SEED, ORDER_SEED};
 use crate::error::TweetEscrowError;
-use crate::{EscrowConfig, Order};
+use crate::{EscrowConfig, Deal};
 
 #[derive(Accounts)]
 pub struct SellerServedCtx<'info> {
@@ -31,7 +31,7 @@ pub struct SellerServedCtx<'info> {
         seeds = [ORDER_SEED.as_bytes(), order.seller.as_ref(), order.buyer.as_ref()],
         bump = order.bump,
     )]
-    pub order: Box<Account<'info, Order>>,
+    pub order: Box<Account<'info, Deal>>,
 
     pub system_program: Program<'info, System>,
 }
