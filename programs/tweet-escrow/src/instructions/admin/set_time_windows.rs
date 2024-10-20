@@ -30,22 +30,17 @@ pub struct SetTimeWindowsCtx<'info> {
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct SetTimeWindowsParams {
-    pub new_buyer_deposit_time_window: i64,
-    pub new_seller_service_time_window: i64,
-    pub new_seller_withdraw_time_window: i64,
+    pub taker_service_time_window: i64,
 }
 
 pub fn handler<'info>(
     ctx: Context<'_, '_, '_, 'info, SetTimeWindowsCtx>,
     params: &SetTimeWindowsParams,
 ) -> Result<()> {
-    msg!(">>> set time windows");
+    msg!(">>> set time window");
 
     let escrow_config = ctx.accounts.escrow_config.as_mut();
-    escrow_config.buyer_deposit_time_window = params.new_buyer_deposit_time_window;
-    escrow_config.seller_service_time_window = params.new_seller_service_time_window;
-    escrow_config.seller_withdraw_time_window = params.new_seller_withdraw_time_window;
+    escrow_config.taker_service_time_window = params.taker_service_time_window;
 
     Ok(())
 }
-
