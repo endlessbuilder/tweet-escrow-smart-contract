@@ -64,16 +64,16 @@ pub mod tweet_escrow {
     }
 
     pub fn seller_served<'info>(
-        ctx: Context<'_, '_, '_, 'info, SellerServedCtx>,
+        ctx: Context<'_, '_, '_, 'info, TakerServedCtx>,
     ) -> Result<()> {
-        seller_served::handler(ctx)
+        taker_served::handler(ctx)
     }
 
     pub fn deposit_order<'info>(
-        ctx: Context<'_, '_, '_, 'info, DepositOrderCtx>,
-        params: DepositOrderParams,
+        ctx: Context<'_, '_, '_, 'info, DepositDealCtx>,
+        params: DepositDealParams,
     ) -> Result<()> {
-        deposit_order::handler(ctx, &params)
+        deposit_deal::handler(ctx, &params)
     }
 
     pub fn withdraw_order<'info>(

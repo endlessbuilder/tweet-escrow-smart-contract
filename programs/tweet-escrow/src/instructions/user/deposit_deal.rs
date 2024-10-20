@@ -6,7 +6,7 @@ use crate::error::TweetEscrowError;
 use crate::{Deal, EscrowConfig};
 
 #[derive(Accounts)]
-pub struct DepositOrderCtx<'info> {
+pub struct DepositDealCtx<'info> {
     #[account(mut)]
     pub maker: Signer<'info>,
 
@@ -72,15 +72,15 @@ pub struct DepositOrderCtx<'info> {
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct DepositOrderParams {
+pub struct DepositDealParams {
     pub deposit_amount: u64,
 }
 
 pub fn handler<'info>(
-    ctx: Context<'_, '_, '_, 'info, DepositOrderCtx>,
-    params: &DepositOrderParams,
+    ctx: Context<'_, '_, '_, 'info, DepositDealCtx>,
+    params: &DepositDealParams,
 ) -> Result<()> {
-    msg!(">>> deposit to order");
+    msg!(">>> deposit to deal");
 
     let clock = Clock::get()?;
     let current_timestamp = clock.unix_timestamp;
@@ -111,7 +111,7 @@ pub fn handler<'info>(
         deal.is_maker_deposit = true;
         deal.maker_deposit_at = current_timestamp;
 
-        let fee_amount = deal.price * (escrow_config.fee_percentagte as u64) / 100;
+        let fee_amount = deal.price * (escrow_config.fee_percentagte as u64) / 100 as u64;
 
         // transfer fee to fee wallet
         escrow_config.transfer_tokens(

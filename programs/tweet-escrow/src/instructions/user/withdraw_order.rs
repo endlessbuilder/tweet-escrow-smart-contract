@@ -1,17 +1,17 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::Token;
 
-use crate::constants::{ESCROW_AUTHORITY_SEED, ESCROW_CONFIG_SEED, DEAL_ESCROW_SEED, DEAL_SEED};
+use crate::constants::{DEAL_ESCROW_SEED, DEAL_SEED, ESCROW_AUTHORITY_SEED, ESCROW_CONFIG_SEED};
 use crate::error::TweetEscrowError;
-use crate::{EscrowConfig, Deal};
+use crate::{Deal, EscrowConfig};
 
 #[derive(Accounts)]
 pub struct WithdrawOrderCtx<'info> {
     #[account(
         mut,
-        constraint = seller.key() == order.seller @ TweetEscrowError::InvalidWithdrawAuthority
+        constraint = backend_wallet.key() == escrow_config.backend_wallet @ TweetEscrowError::InvalidWithdrawAuthority
     )]
-    pub seller: Signer<'info>,
+    pub backend_wallet: Signer<'info>,
 
     #[account(
         mut,
@@ -29,100 +29,67 @@ pub struct WithdrawOrderCtx<'info> {
 
     #[account(
         mut,
-        seeds = [DEAL_SEED.as_bytes(), order.seller.as_ref(), order.buyer.as_ref()],
-        bump = order.bump,
+        seeds = [DEAL_SEED.as_bytes(), deal.maker.as_ref(), deal.taker.as_ref()],
+        bump = deal.bump,
     )]
-    pub order: Box<Account<'info, Deal>>,
+    pub deal: Box<Account<'info, Deal>>,
 
     /// CHECK:
     #[account(
-        seeds = [DEAL_ESCROW_SEED.as_bytes(), order.key().as_ref()],
-        bump = order.deal_escrow_bump
+        seeds = [DEAL_ESCROW_SEED.as_bytes(), deal.key().as_ref()],
+        bump = deal.deal_escrow_bump
     )]
-    pub order_escrow: AccountInfo<'info>,
-
-    /// CHECK:
-    #[account(
-        mut,
-        constraint = fee_wallet.key() == escrow_config.fee_wallet @ TweetEscrowError::InvaildFeeWallet
-    )]
-    pub fee_wallet: AccountInfo<'info>,
-
-    /// CHECK:
-    #[account(
-        mut,
-        owner = fee_wallet.key() @ TweetEscrowError::InvalidTokenAccount
-    )]
-    pub fee_pay_account: AccountInfo<'info>,
+    pub deal_escrow: AccountInfo<'info>,
 
     /// CHECK
     #[account(
         mut,
-        owner = seller.key() @ TweetEscrowError::InvalidTokenAccount
+        owner = deal.taker @ TweetEscrowError::InvalidTokenAccount
     )]
-    pub seller_pay_account: AccountInfo<'info>,
+    pub taker_pay_account: AccountInfo<'info>,
 
     /// CHECK
     #[account(
         mut,
-        owner = order_escrow.key() @ TweetEscrowError::InvalidTokenAccount
+        owner = deal_escrow.key() @ TweetEscrowError::InvalidTokenAccount
     )]
-    pub order_escrow_pay_account: AccountInfo<'info>,
+    pub deal_escrow_pay_account: AccountInfo<'info>,
 
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
 }
 
 pub fn handler<'info>(ctx: Context<'_, '_, '_, 'info, WithdrawOrderCtx>) -> Result<()> {
-    msg!(">>> withdraw from order escrow to seller");
-
-    let clock = Clock::get()?;
-    let current_timestamp = clock.unix_timestamp;
+    msg!(">>> withdraw from order escrow to taker");
 
     let escrow_config = ctx.accounts.escrow_config.as_mut();
 
-    let order = ctx.accounts.order.as_mut();
-    let is_served_by_seller = order.is_seller_served;
-    let is_withdrawal = order.is_withdrawal;
+    let deal = ctx.accounts.deal.as_mut();
+    let is_served_by_taker = deal.is_taker_served;
+    let is_withdrawal = deal.is_withdrawal;
 
     require!(
-        is_served_by_seller && is_withdrawal,
+        is_served_by_taker && is_withdrawal,
         TweetEscrowError::OrderNotWithdrawal
     );
-    require!(
-        (current_timestamp - order.seller_served_at) > escrow_config.seller_withdraw_time_window,
-        TweetEscrowError::OrderNotWithdrawal
-    );
-    require!(!order.is_completed, TweetEscrowError::WithdrawedAlready);
+    require!(!deal.is_completed, TweetEscrowError::WithdrawedAlready);
 
-    let withdraw_amount = order.deposited_amount * escrow_config.fee_percentagte as u64 / 100;
-    let fee_amount = order.deposited_amount - withdraw_amount;
+    let withdraw_amount =
+        deal.price * (100 as u64 - escrow_config.fee_percentagte as u64) / 100 as u64;
 
-    // withdraw to seller
+    // withdraw to taker
     escrow_config.transfer_tokens(
         ctx.accounts
-            .order_escrow_pay_account
+            .deal_escrow_pay_account
             .clone()
             .to_account_info(),
-        ctx.accounts.seller_pay_account.clone().to_account_info(),
+        ctx.accounts.taker_pay_account.clone().to_account_info(),
         ctx.accounts.escrow_authority.clone().to_account_info(),
         ctx.accounts.token_program.clone().to_account_info(),
         withdraw_amount,
     )?;
 
-    // transfer fee to fee wallet
-    escrow_config.transfer_tokens(
-        ctx.accounts
-            .order_escrow_pay_account
-            .clone()
-            .to_account_info(),
-        ctx.accounts.fee_pay_account.clone().to_account_info(),
-        ctx.accounts.escrow_authority.clone().to_account_info(),
-        ctx.accounts.token_program.clone().to_account_info(),
-        fee_amount,
-    )?;
-
-    order.is_completed = true;
+    deal.is_completed = true;
 
     Ok(())
 }
