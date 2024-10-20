@@ -37,7 +37,7 @@ pub struct CreateDealCtx<'info> {
         init,
         payer = backend_wallet,
         space = Deal::LEN,
-        seeds = [DEAL_SEED.as_bytes(), seller.key().as_ref(), buyer.key().as_ref()],
+        seeds = [DEAL_SEED.as_bytes(), maker.key().as_ref(), taker.key().as_ref()],
         bump
     )]
     pub deal: Box<Account<'info, Deal>>,

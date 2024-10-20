@@ -7,7 +7,7 @@ pub enum TweetEscrowError {
     #[msg("Token account is invalid")]
     InvalidTokenAccount,
     #[msg("Order is already depositted by buyer")]
-    OrderDepositedAlready,
+    DealDepositedAlready,
     #[msg("Withdrawer is not invalid for this order")]
     InvalidWithdrawAuthority,
     #[msg("Fee wallet is invalid")]
