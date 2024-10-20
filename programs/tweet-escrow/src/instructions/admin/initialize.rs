@@ -46,9 +46,7 @@ pub fn handler<'info>(
     escrow_config.admin = params.admin;
     escrow_config.backend_wallet = params.backend_wallet;
 
-    escrow_config.buyer_deposit_time_window = params.buyer_deposit_time_window;
-    escrow_config.seller_service_time_window = params.seller_service_time_window;
-    escrow_config.seller_withdraw_time_window = params.seller_withdraw_time_window;
+    escrow_config.taker_service_time_window = 12 * 60 * 60;
 
     escrow_config.fee_percentagte = params.fee_percentagte;
     escrow_config.fee_wallet = params.fee_wallet;
