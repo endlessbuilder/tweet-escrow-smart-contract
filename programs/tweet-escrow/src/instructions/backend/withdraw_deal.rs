@@ -6,7 +6,7 @@ use crate::error::TweetEscrowError;
 use crate::{Deal, EscrowConfig};
 
 #[derive(Accounts)]
-pub struct WithdrawOrderCtx<'info> {
+pub struct WithdrawDealCtx<'info> {
     #[account(
         mut,
         constraint = backend_wallet.key() == escrow_config.backend_wallet @ TweetEscrowError::InvalidWithdrawAuthority
@@ -59,7 +59,7 @@ pub struct WithdrawOrderCtx<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler<'info>(ctx: Context<'_, '_, '_, 'info, WithdrawOrderCtx>) -> Result<()> {
+pub fn handler<'info>(ctx: Context<'_, '_, '_, 'info, WithdrawDealCtx>) -> Result<()> {
     msg!(">>> withdraw from order escrow to taker");
 
     let escrow_config = ctx.accounts.escrow_config.as_mut();
