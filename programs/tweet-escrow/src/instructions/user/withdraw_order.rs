@@ -3,7 +3,7 @@ use anchor_spl::token::Token;
 
 use crate::constants::{ESCROW_AUTHORITY_SEED, ESCROW_CONFIG_SEED, ORDER_ESCROW_SEED, ORDER_SEED};
 use crate::error::TweetEscrowError;
-use crate::{EscrowConfig, Order};
+use crate::{EscrowConfig, Deal};
 
 #[derive(Accounts)]
 pub struct WithdrawOrderCtx<'info> {
@@ -32,7 +32,7 @@ pub struct WithdrawOrderCtx<'info> {
         seeds = [ORDER_SEED.as_bytes(), order.seller.as_ref(), order.buyer.as_ref()],
         bump = order.bump,
     )]
-    pub order: Box<Account<'info, Order>>,
+    pub order: Box<Account<'info, Deal>>,
 
     /// CHECK:
     #[account(

@@ -9,9 +9,7 @@ pub struct EscrowConfig {
     pub admin: Pubkey,
     pub backend_wallet: Pubkey,
 
-    pub buyer_deposit_time_window: i64,
-    pub seller_service_time_window: i64,
-    pub seller_withdraw_time_window: i64,
+    pub taker_service_time_window: i64,
 
     pub fee_percentagte: u8,
     pub fee_wallet: Pubkey,

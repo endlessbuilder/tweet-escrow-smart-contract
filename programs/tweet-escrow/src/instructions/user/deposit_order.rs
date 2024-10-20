@@ -3,7 +3,7 @@ use anchor_spl::token::Token;
 
 use crate::constants::{ESCROW_AUTHORITY_SEED, ESCROW_CONFIG_SEED, ORDER_ESCROW_SEED, ORDER_SEED};
 use crate::error::TweetEscrowError;
-use crate::{EscrowConfig, Order};
+use crate::{EscrowConfig, Deal};
 
 #[derive(Accounts)]
 pub struct DepositOrderCtx<'info> {
@@ -30,7 +30,7 @@ pub struct DepositOrderCtx<'info> {
         bump = order.bump,
         constraint = order.buyer == buyer.key() @ TweetEscrowError::InvalidAuthority
     )]
-    pub order: Box<Account<'info, Order>>,
+    pub order: Box<Account<'info, Deal>>,
 
     /// CHECK:
     #[account(
