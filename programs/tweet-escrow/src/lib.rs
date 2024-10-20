@@ -57,10 +57,10 @@ pub mod tweet_escrow {
     }
 
     pub fn create_order<'info>(
-        ctx: Context<'_, '_, '_, 'info, CreateOrderCtx>,
-        params: CreateOrderParams,
+        ctx: Context<'_, '_, '_, 'info, CreateDealCtx>,
+        params: CreateDealParams,
     ) -> Result<()> {
-        create_order::handler(ctx, &params)
+        create_deal::handler(ctx, &params)
     }
 
     pub fn seller_served<'info>(
