@@ -14,6 +14,8 @@ declare_id!("Bh3Y47AqrAWBGCtFmSKqBdyA7tNtHGdD2yrYF9apSWJH");
 pub mod tweet_escrow {
     use super::*;
 
+    // admin
+
     pub fn initialize<'info>(
         ctx: Context<'_, '_, '_, 'info, InitializeCtx>,
         params: InitializeConifgParams,
@@ -56,30 +58,29 @@ pub mod tweet_escrow {
         set_time_windows::handler(ctx, &params)
     }
 
-    pub fn create_order<'info>(
+    // backend
+
+    pub fn create_deal<'info>(
         ctx: Context<'_, '_, '_, 'info, CreateDealCtx>,
         params: CreateDealParams,
     ) -> Result<()> {
         create_deal::handler(ctx, &params)
     }
 
-    pub fn seller_served<'info>(
-        ctx: Context<'_, '_, '_, 'info, SellerServedCtx>,
-    ) -> Result<()> {
-        seller_served::handler(ctx)
+    pub fn seller_served<'info>(ctx: Context<'_, '_, '_, 'info, TakerServedCtx>) -> Result<()> {
+        taker_served::handler(ctx)
     }
 
-    pub fn deposit_order<'info>(
-        ctx: Context<'_, '_, '_, 'info, DepositOrderCtx>,
-        params: DepositOrderParams,
-    ) -> Result<()> {
-        deposit_order::handler(ctx, &params)
+    pub fn withdraw_deal<'info>(ctx: Context<'_, '_, '_, 'info, WithdrawDealCtx>) -> Result<()> {
+        withdraw_deal::handler(ctx)
     }
 
-    pub fn withdraw_order<'info>(
-        ctx: Context<'_, '_, '_, 'info, WithdrawOrderCtx>,
-    ) -> Result<()> {
-        withdraw_order::handler(ctx)
-    }
+    // user
 
+    pub fn deposit_deal<'info>(
+        ctx: Context<'_, '_, '_, 'info, DepositDealCtx>,
+        params: DepositDealParams,
+    ) -> Result<()> {
+        deposit_deal::handler(ctx, &params)
+    }
 }

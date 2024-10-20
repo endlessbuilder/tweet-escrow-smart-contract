@@ -64,9 +64,6 @@ pub fn handler<'info>(
     params: &CreateDealParams,
 ) -> Result<()> {
     msg!(">>> create order");
-
-    let clock = Clock::get()?;
-    let current_timestamp = clock.unix_timestamp;
     
     let deal = ctx.accounts.deal.as_mut();
     deal.bump = ctx.bumps.deal;
