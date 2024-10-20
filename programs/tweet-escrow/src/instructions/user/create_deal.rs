@@ -1,12 +1,12 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::Token;
 
-use crate::constants::{ESCROW_AUTHORITY_SEED, ESCROW_CONFIG_SEED, ORDER_ESCROW_SEED, ORDER_SEED};
+use crate::constants::{ESCROW_AUTHORITY_SEED, ESCROW_CONFIG_SEED, DEAL_ESCROW_SEED, DEAL_SEED};
 use crate::error::TweetEscrowError;
 use crate::{EscrowConfig, Deal};
 
 #[derive(Accounts)]
-pub struct CreateOrderCtx<'info> {
+pub struct CreateDealCtx<'info> {
     #[account(mut)]
     pub backend_wallet: Signer<'info>,
 
@@ -28,57 +28,58 @@ pub struct CreateOrderCtx<'info> {
 
     /// CHECK:
     #[account(mut)]
-    pub seller: AccountInfo<'info>,
+    pub maker: AccountInfo<'info>,
     /// CHECK;
     #[account(mut)]
-    pub buyer: AccountInfo<'info>,
+    pub taker: AccountInfo<'info>,
 
     #[account(
         init,
         payer = backend_wallet,
         space = Deal::LEN,
-        seeds = [ORDER_SEED.as_bytes(), seller.key().as_ref(), buyer.key().as_ref()],
+        seeds = [DEAL_SEED.as_bytes(), maker.key().as_ref(), taker.key().as_ref()],
         bump
     )]
-    pub order: Box<Account<'info, Deal>>,
+    pub deal: Box<Account<'info, Deal>>,
 
     /// CHECK: 
     #[account(
-        seeds = [ORDER_ESCROW_SEED.as_bytes(), order.key().as_ref()],
+        seeds = [DEAL_ESCROW_SEED.as_bytes(), deal.key().as_ref()],
         bump
     )]
-    pub order_escrow: AccountInfo<'info>,
+    pub deal_escrow: AccountInfo<'info>,
 
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct CreateOrderParams {
-    pub order_price: u64,
+pub struct CreateDealParams {
+    pay_token_mint: Pubkey,
+    pub deal_price: u64,
 }
 
 pub fn handler<'info>(
-    ctx: Context<'_, '_, '_, 'info, CreateOrderCtx>,
-    params: &CreateOrderParams,
+    ctx: Context<'_, '_, '_, 'info, CreateDealCtx>,
+    params: &CreateDealParams,
 ) -> Result<()> {
     msg!(">>> create order");
 
     let clock = Clock::get()?;
     let current_timestamp = clock.unix_timestamp;
     
-    let order = ctx.accounts.order.as_mut();
-    order.bump = ctx.bumps.order;
-    order.order_escrow_bump = ctx.bumps.order_escrow;
-    order.seller = ctx.accounts.seller.key();
-    order.buyer = ctx.accounts.buyer.key();
-    order.price = params.order_price;
-    order.deposited_amount = 0;
-    order.seller_approved_at = current_timestamp;
-    order.is_buyer_deposited = false;
-    order.is_seller_served = false;
-    order.is_withdrawal = false;
-    order.is_completed = false;
+    let deal = ctx.accounts.deal.as_mut();
+    deal.bump = ctx.bumps.deal;
+    deal.deal_escrow_bump = ctx.bumps.deal_escrow;
+    deal.maker = ctx.accounts.maker.key();
+    deal.taker = ctx.accounts.taker.key();
+    deal.pay_token_mint = params.pay_token_mint;
+    deal.price = params.deal_price;
+    deal.deposited_amount = 0;
+    deal.is_maker_deposit = false;
+    deal.is_taker_served = false;
+    deal.is_withdrawal = false;
+    deal.is_completed = false;
     
     Ok(())
 }

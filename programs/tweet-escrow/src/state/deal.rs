@@ -3,13 +3,13 @@ use anchor_lang::prelude::*;
 #[account]
 #[derive(Default, Debug)]
 pub struct Deal {
-    pub maker: Pubkey,
-    pub taker: Pubkey,
+    pub maker: Pubkey, // maker lists tweet request
+    pub taker: Pubkey, // toker tweets
 
-    pub price: u64, // order price
+    pub price: u64, // deal price
     pub pay_token_mint: Pubkey, // payment token mint for order
     
-    pub deal_started_at: i64, // timestamp when deal started, deal start once maker deposit amount to contract
+    pub maker_deposit_at: i64, // timestamp when deal started, deal start once maker deposit amount to contract
 
     pub deposited_amount: u64, // amount
     pub is_maker_deposit: bool, 
@@ -19,7 +19,7 @@ pub struct Deal {
     pub is_completed: bool,
 
     pub bump: u8,
-    pub order_escrow_bump: u8,
+    pub deal_escrow_bump: u8,
 }
 
 impl Deal {

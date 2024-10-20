@@ -1,14 +1,14 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::Token;
 
-use crate::constants::{ESCROW_AUTHORITY_SEED, ESCROW_CONFIG_SEED, ORDER_ESCROW_SEED, ORDER_SEED};
+use crate::constants::{DEAL_ESCROW_SEED, DEAL_SEED, ESCROW_AUTHORITY_SEED, ESCROW_CONFIG_SEED};
 use crate::error::TweetEscrowError;
-use crate::{EscrowConfig, Deal};
+use crate::{Deal, EscrowConfig};
 
 #[derive(Accounts)]
 pub struct DepositOrderCtx<'info> {
     #[account(mut)]
-    pub buyer: Signer<'info>,
+    pub maker: Signer<'info>,
 
     #[account(
         mut,
@@ -26,32 +26,46 @@ pub struct DepositOrderCtx<'info> {
 
     #[account(
         mut,
-        seeds = [ORDER_SEED.as_bytes(), order.seller.as_ref(), order.buyer.as_ref()],
-        bump = order.bump,
-        constraint = order.buyer == buyer.key() @ TweetEscrowError::InvalidAuthority
+        seeds = [DEAL_SEED.as_bytes(), deal.maker.as_ref(), deal.taker.as_ref()],
+        bump = deal.bump,
+        constraint = deal.maker == maker.key() @ TweetEscrowError::InvalidAuthority
     )]
-    pub order: Box<Account<'info, Deal>>,
+    pub deal: Box<Account<'info, Deal>>,
+
+    /// CHECK
+    #[account(
+        mut,
+        owner = deal_escrow.key() @ TweetEscrowError::InvalidTokenAccount
+    )]
+    pub deal_escrow_pay_account: AccountInfo<'info>,
 
     /// CHECK:
     #[account(
-        seeds = [ORDER_ESCROW_SEED.as_bytes(), order.key().as_ref()],
-        bump = order.order_escrow_bump
+        seeds = [DEAL_ESCROW_SEED.as_bytes(), deal.key().as_ref()],
+        bump = deal.deal_escrow_bump
     )]
-    pub order_escrow: AccountInfo<'info>,
+    pub deal_escrow: AccountInfo<'info>,
+
+    /// CHECK:
+    #[account(
+        mut,
+        constraint = fee_wallet.key() == escrow_config.fee_wallet @ TweetEscrowError::InvaildFeeWallet
+    )]
+    pub fee_wallet: AccountInfo<'info>,
+
+    /// CHECK:
+    #[account(
+        mut,
+        owner = fee_wallet.key() @ TweetEscrowError::InvalidTokenAccount
+    )]
+    pub fee_pay_account: AccountInfo<'info>,
 
     /// CHECK
     #[account(
         mut,
-        owner = buyer.key() @ TweetEscrowError::InvalidTokenAccount
+        owner = maker.key() @ TweetEscrowError::InvalidTokenAccount
     )]
-    pub buyer_pay_account: AccountInfo<'info>,
-
-    /// CHECK
-    #[account(
-        mut,
-        owner = order_escrow.key() @ TweetEscrowError::InvalidTokenAccount
-    )]
-    pub order_escrow_pay_account: AccountInfo<'info>,
+    pub maker_pay_account: AccountInfo<'info>,
 
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
@@ -73,46 +87,55 @@ pub fn handler<'info>(
 
     let escrow_config = ctx.accounts.escrow_config.as_mut();
 
-    let order = ctx.accounts.order.as_mut();
-    let is_deposit_completed = order.is_buyer_deposited;
+    let deal = ctx.accounts.deal.as_mut();
 
     require!(
-        !is_deposit_completed,
-        TweetEscrowError::OrderDepositedAlready
-    );
-    require!(
-        (current_timestamp - order.seller_approved_at) < escrow_config.buyer_deposit_time_window,
-        TweetEscrowError::DepositTimeWindowExpired
+        !deal.is_maker_deposit,
+        TweetEscrowError::DealDepositedAlready
     );
 
-    let amount_to_be_deposited = order.deposited_amount;
+    let amount_to_be_deposited = deal.price - deal.deposited_amount;
 
     if params.deposit_amount >= amount_to_be_deposited {
         escrow_config.transfer_tokens_from_user(
-            ctx.accounts.buyer_pay_account.clone().to_account_info(),
+            ctx.accounts.maker_pay_account.clone().to_account_info(),
             ctx.accounts
-                .order_escrow_pay_account
+                .deal_escrow_pay_account
                 .clone()
                 .to_account_info(),
-            ctx.accounts.buyer.clone().to_account_info(),
+            ctx.accounts.maker.clone().to_account_info(),
             ctx.accounts.token_program.clone().to_account_info(),
             amount_to_be_deposited,
         )?;
-        order.deposited_amount += amount_to_be_deposited;
-        order.is_buyer_deposited = true;
-        order.buyer_deposited_at = current_timestamp;
-    } else {
-        escrow_config.transfer_tokens_from_user(
-            ctx.accounts.buyer_pay_account.clone().to_account_info(),
+        deal.deposited_amount += amount_to_be_deposited;
+        deal.is_maker_deposit = true;
+        deal.maker_deposit_at = current_timestamp;
+
+        let fee_amount = deal.price * (escrow_config.fee_percentagte as u64) / 100;
+
+        // transfer fee to fee wallet
+        escrow_config.transfer_tokens(
             ctx.accounts
-                .order_escrow_pay_account
+                .deal_escrow_pay_account
                 .clone()
                 .to_account_info(),
-            ctx.accounts.buyer.clone().to_account_info(),
+            ctx.accounts.fee_pay_account.clone().to_account_info(),
+            ctx.accounts.escrow_authority.clone().to_account_info(),
+            ctx.accounts.token_program.clone().to_account_info(),
+            fee_amount,
+        )?;
+    } else {
+        escrow_config.transfer_tokens_from_user(
+            ctx.accounts.maker_pay_account.clone().to_account_info(),
+            ctx.accounts
+                .deal_escrow_pay_account
+                .clone()
+                .to_account_info(),
+            ctx.accounts.maker.clone().to_account_info(),
             ctx.accounts.token_program.clone().to_account_info(),
             params.deposit_amount,
         )?;
-        order.deposited_amount += params.deposit_amount;
+        deal.deposited_amount += params.deposit_amount;
     }
 
     Ok(())

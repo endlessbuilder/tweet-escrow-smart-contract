@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::constants::{ESCROW_AUTHORITY_SEED, ESCROW_CONFIG_SEED, ORDER_SEED};
+use crate::constants::{ESCROW_AUTHORITY_SEED, ESCROW_CONFIG_SEED, DEAL_SEED};
 use crate::error::TweetEscrowError;
 use crate::{EscrowConfig, Deal};
 
@@ -28,7 +28,7 @@ pub struct SellerServedCtx<'info> {
 
     #[account(
         mut,
-        seeds = [ORDER_SEED.as_bytes(), order.seller.as_ref(), order.buyer.as_ref()],
+        seeds = [DEAL_SEED.as_bytes(), order.seller.as_ref(), order.buyer.as_ref()],
         bump = order.bump,
     )]
     pub order: Box<Account<'info, Deal>>,

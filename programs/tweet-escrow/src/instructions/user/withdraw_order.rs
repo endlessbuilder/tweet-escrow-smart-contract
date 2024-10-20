@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::Token;
 
-use crate::constants::{ESCROW_AUTHORITY_SEED, ESCROW_CONFIG_SEED, ORDER_ESCROW_SEED, ORDER_SEED};
+use crate::constants::{ESCROW_AUTHORITY_SEED, ESCROW_CONFIG_SEED, DEAL_ESCROW_SEED, DEAL_SEED};
 use crate::error::TweetEscrowError;
 use crate::{EscrowConfig, Deal};
 
@@ -29,15 +29,15 @@ pub struct WithdrawOrderCtx<'info> {
 
     #[account(
         mut,
-        seeds = [ORDER_SEED.as_bytes(), order.seller.as_ref(), order.buyer.as_ref()],
+        seeds = [DEAL_SEED.as_bytes(), order.seller.as_ref(), order.buyer.as_ref()],
         bump = order.bump,
     )]
     pub order: Box<Account<'info, Deal>>,
 
     /// CHECK:
     #[account(
-        seeds = [ORDER_ESCROW_SEED.as_bytes(), order.key().as_ref()],
-        bump = order.order_escrow_bump
+        seeds = [DEAL_ESCROW_SEED.as_bytes(), order.key().as_ref()],
+        bump = order.deal_escrow_bump
     )]
     pub order_escrow: AccountInfo<'info>,
 
