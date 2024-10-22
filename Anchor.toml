@@ -10,12 +10,15 @@ tweet_escrow = "Bh3Y47AqrAWBGCtFmSKqBdyA7tNtHGdD2yrYF9apSWJH"
 [programs.devnet]
 tweet_escrow = "Bh3Y47AqrAWBGCtFmSKqBdyA7tNtHGdD2yrYF9apSWJH"
 
+[programs.testnet]
+tweet_escrow = "Bh3Y47AqrAWBGCtFmSKqBdyA7tNtHGdD2yrYF9apSWJH"
+
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "https://devnet.helius-rpc.com/?api-key=bf788362-5f53-41d2-9230-e48586e76a06"
-wallet = "/home/wsl/.config/solana/id.json"
+cluster = "https://api.testnet.solana.com"
+wallet = "./authority.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
